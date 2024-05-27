@@ -1,10 +1,9 @@
 import * as yup from 'yup';
 
 export const registerFormSchema = yup.object().shape({
-  email: yup
+  username: yup
     .string()
-    .email('Email inválido')
-    .required('O email é obrigatório!'),
+    .required('O nome de usuário é obrigatório!'),
   password: yup
     .string()
     .matches(
@@ -18,14 +17,13 @@ export const registerFormSchema = yup.object().shape({
 });
 
 export const loginFormSchema = yup.object().shape({
-  email: yup
+  username: yup
     .string()
-    .email('Email inválido')
-    .required('O email é obrigatório!'),
+    .required('O nome de usuário é obrigatório!'),
   password: yup.string().required('A senha é obrigatório!'),
 });
 
-export const hitFormSchema = yup.object().shape({
+export const hintFormSchema = yup.object().shape({
   website: yup.string().required('O site é obrigatório!'),
   hit: yup
     .string()

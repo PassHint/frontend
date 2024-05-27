@@ -16,17 +16,17 @@ import { TemplateScreen } from '../../components/TemplateScreen/TemplateScreen';
 import { loginFormSchema } from '../../validation';
 
 export default function Login() {
-  const formEmailRef = useRef<HTMLInputElement>(null);
+  const formUsernameRef = useRef<HTMLInputElement>(null);
   const formPassWordRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
   async function validateDate() {
-    const emailValue = formEmailRef.current?.value;
+    const usernameValue = formUsernameRef.current?.value;
     const passwordValue = formPassWordRef.current?.value;
 
     try {
       await loginFormSchema.validate({
-        email: emailValue,
+        username: usernameValue,
         password: passwordValue,
       });
     } catch (error) {
@@ -70,7 +70,7 @@ export default function Login() {
             borderBottom='1px solid'
             borderColor='cyanX.200'
           >
-            PassHit
+            PassHint
           </Text>
           <Text textAlign='center' fontSize='1.2rem' fontWeight='normal'>
             Logar-se
@@ -79,11 +79,11 @@ export default function Login() {
         <FormControl isRequired>
           <Flex flexDirection='column' gap='2rem'>
             <Box>
-              <FormLabel fontWeight='normal'>Email:</FormLabel>
+              <FormLabel fontWeight='normal'>Nome de usuário:</FormLabel>
               <Input
-                type='email'
-                ref={formEmailRef}
-                placeholder='Digite o email'
+                type='text'
+                ref={formUsernameRef}
+                placeholder='Digite o username'
                 _focus={{ boxShadow: 'none', borderColor: 'cyanX.100' }}
               />
             </Box>

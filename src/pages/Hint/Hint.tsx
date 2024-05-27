@@ -27,15 +27,15 @@ import {
 import { AddIcon, QuestionIcon, SearchIcon } from '@chakra-ui/icons';
 import { useRef, useState } from 'react';
 import { TemplateScreen } from '../../components/TemplateScreen/TemplateScreen';
-import { hitFormSchema } from '../../validation';
+import { hintFormSchema } from '../../validation';
 import { ValidationError } from 'yup';
 
-export default function Hit() {
+export default function Hint() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
   const [fiveIconWebsite, setFiveIconWebsite] = useState<string | null>(null);
   const formWebSiteRef = useRef<HTMLInputElement>(null);
-  const formHitRef = useRef<HTMLTextAreaElement>(null);
+  const formHintRef = useRef<HTMLTextAreaElement>(null);
 
   const urlFiveIcon = `https://www.google.com/s2/favicons?domain=`;
 
@@ -44,14 +44,14 @@ export default function Hit() {
     return setFiveIconWebsite(`${urlFiveIcon}${websiteValue}`);
   }
 
-  async function createHit() {
+  async function createHint() {
     const websiteValue = formWebSiteRef.current?.value;
-    const hitValue = formHitRef.current?.value;
+    const hintValue = formHintRef.current?.value;
 
     try {
-      await hitFormSchema.validate({
+      await hintFormSchema.validate({
         website: websiteValue,
-        hit: hitValue,
+        hint: hintValue,
       });
     } catch (error) {
       if (error instanceof ValidationError) {
@@ -135,7 +135,7 @@ export default function Hit() {
 
         <Modal
           initialFocusRef={formWebSiteRef}
-          finalFocusRef={formHitRef}
+          finalFocusRef={formHintRef}
           isOpen={isOpen}
           onClose={onClose}
         >
@@ -170,7 +170,7 @@ export default function Hit() {
               <FormControl mt={4}>
                 <FormLabel>Dica da senha:</FormLabel>
                 <Textarea
-                  ref={formHitRef}
+                  ref={formHintRef}
                   height='8rem'
                   placeholder='Dica da senha'
                   _focus={{ boxShadow: 'none', borderColor: 'cyanX.100' }}
@@ -180,7 +180,7 @@ export default function Hit() {
 
             <ModalFooter>
               <Button
-                onClick={createHit}
+                onClick={createHint}
                 mr={3}
                 background='cyanX.200'
                 textColor='whiteX.100'

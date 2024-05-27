@@ -14,21 +14,22 @@ import { useRef } from 'react';
 import { ValidationError } from 'yup';
 import { TemplateScreen } from '../../components/TemplateScreen/TemplateScreen';
 import { registerFormSchema } from '../../validation';
+import { routes } from '../../routes';
 
 export default function Register() {
-  const formEmailRef = useRef<HTMLInputElement>(null);
+  const formUsernameRef = useRef<HTMLInputElement>(null);
   const formPassWordRef = useRef<HTMLInputElement>(null);
   const formPasswordConfirmRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
   async function validateDate() {
-    const emailValue = formEmailRef.current?.value;
-    const passwordValue = formPassWordRef.current?.value;
-    const passwordConfirmValue = formPasswordConfirmRef.current?.value;
+    const usernameValue = formUsernameRef.current?.value || '';
+    const passwordValue = formPassWordRef.current?.value || '';
+    const passwordConfirmValue = formPasswordConfirmRef.current?.value || '';
 
     try {
       await registerFormSchema.validate({
-        email: emailValue,
+        username: usernameValue,
         password: passwordValue,
         confirmPassword: passwordConfirmValue,
       });
@@ -43,6 +44,23 @@ export default function Register() {
           isClosable: true,
         });
       }
+      return toast({
+        title: 'Error!',
+        description: 'Tipo de error não mapeado!',
+        status: 'warning',
+        duration: 2000,
+        position: 'top',
+        isClosable: true,
+      });
+    }
+
+    await createUser({ username: usernameValue, password: passwordValue })
+  }
+
+  async function createUser({ username, password }: { username: string, password: string }) {
+    try {
+      const requestCreateUser = await routes.create_user({ username, password })
+    } catch (error) {
       return toast({
         title: 'Error!',
         description: 'Tipo de error não mapeado!',
@@ -72,7 +90,7 @@ export default function Register() {
             borderBottom='1px solid'
             borderColor='cyanX.200'
           >
-            PassHit
+            PassHint
           </Text>
           <Text textAlign='center' fontSize='1.2rem' fontWeight='normal'>
             Registrar-se
@@ -81,11 +99,11 @@ export default function Register() {
         <FormControl isRequired>
           <Flex flexDirection='column' gap='2rem'>
             <Box>
-              <FormLabel fontWeight='normal'>Email:</FormLabel>
+              <FormLabel fontWeight='normal'>Nome de usuário:</FormLabel>
               <Input
-                type='email'
-                ref={formEmailRef}
-                placeholder='Digite o email'
+                type='text'
+                ref={formUsernameRef}
+                placeholder='Digite o username'
                 required
                 _focus={{ boxShadow: 'none', borderColor: 'cyanX.100' }}
               />

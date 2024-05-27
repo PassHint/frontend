@@ -6,7 +6,7 @@ import Login from './pages/Login/Login.tsx';
 import { theme } from './theme/theme.ts';
 import ErrorPage from './pages/ErrorPage/ErrorPage.tsx';
 import Register from './pages/Register/Register.tsx';
-import Hit from './pages/Hit/Hit.tsx';
+import Hint from './pages/Hint/Hint.tsx';
 
 const router = createBrowserRouter([
   {
@@ -20,8 +20,8 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
   },
   {
-    path: '/hit',
-    element: <Hit />,
+    path: '/hint',
+    element: <Hint />,
     errorElement: <ErrorPage />,
   },
 ]);
