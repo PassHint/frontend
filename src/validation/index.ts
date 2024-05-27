@@ -24,3 +24,11 @@ export const loginFormSchema = yup.object().shape({
     .required('O email é obrigatório!'),
   password: yup.string().required('A senha é obrigatório!'),
 });
+
+export const hitFormSchema = yup.object().shape({
+  website: yup.string().required('O site é obrigatório!'),
+  hit: yup
+    .string()
+    .min(3, 'Precisa ter no mínimo 3 caracteres!')
+    .required('A dica é obrigatória'),
+});

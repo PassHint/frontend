@@ -12,6 +12,7 @@ export function TemplateScreen({ children }: TemplateScreenProps) {
       height='100vh'
       justifyContent='center'
       alignItems='center'
+      padding='2rem'
     >
       {children}
     </Flex>
