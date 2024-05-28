@@ -7,21 +7,17 @@ import {
   Box,
   Button,
   Flex,
-  FormControl,
-  FormLabel,
   Image,
   Input,
   InputGroup,
   InputLeftAddon,
   Modal,
-  ModalBody,
   ModalCloseButton,
   ModalContent,
   ModalFooter,
   ModalHeader,
   ModalOverlay,
   Text,
-  Textarea,
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
@@ -32,9 +28,10 @@ import { TemplateScreen } from '../../components/TemplateScreen/TemplateScreen';
 import { hintFormSchema } from '../../validation';
 import { routes } from '../../routes';
 import { InterfaceHint, InterfaceUser } from '../../interfaces';
+import HintModal from '../../components/HintModal';
 
 export default function Hint() {
-  const [hints, setHints] = useState<InterfaceHint[]>();
+  const [hints, setHints] = useState<InterfaceHint[]>([]);
   const [hintFocus, setHintFocus] = useState<InterfaceHint>();
   const [filterHints, setFilterHints] = useState<InterfaceHint[]>();
   const { isOpen: isOpenModalHint, onOpen: onOpenModalHint, onClose: onCloseModalHint } = useDisclosure();
@@ -168,6 +165,7 @@ export default function Hint() {
         });
       }
       setHints([...(hints || []), response.data]);
+      onCloseModalHint()
       return toast({
         title: 'Sucesso!',
         description: 'Dica criada com sucesso!',
@@ -242,6 +240,17 @@ export default function Hint() {
     }
   }
 
+  async function openHintModel(hint?: InterfaceHint) {
+    if(hint) {
+      setHintFocus(hint)
+      onOpenModalHint()
+    } else {
+      setHintFocus(undefined)
+      setFiveIconWebsite(null)
+      onOpenModalHint()
+    }
+  }
+
   async function searchHint(event: ChangeEvent<HTMLInputElement>) {
     const value = event.target.value;
     const regex = new RegExp(value, 'gi');
@@ -277,7 +286,7 @@ export default function Hint() {
             padding='0'
             _hover={{ background: 'cyanX.100' }}
             _focus={{ background: 'cyanX.100' }}
-            onClick={onOpenModalHint}
+            onClick={() => openHintModel()}
           >
             <AddIcon textColor='whiteX.100' />
           </Button>
@@ -349,9 +358,9 @@ export default function Hint() {
                             padding='0'
                             _hover={{ background: 'cyanX.100' }}
                             _focus={{ background: 'cyanX.100' }}
-                            onClick={onOpenModalHint}
+                            onClick={() => openHintModel(hint)}
                           >
-                            <DeleteIcon textColor='whiteX.100'/>
+                            <QuestionIcon textColor='whiteX.100'/>
                           </Button>
                         </Flex>
                       </Flex>
@@ -361,7 +370,20 @@ export default function Hint() {
           </Accordion>
         </Box>
 
-        <Modal
+        {
+          isOpenModalHint && <HintModal
+            hint={hintFocus}
+            fiveIconWebsite={fiveIconWebsite}
+            formHintRef={formHintRef}
+            formWebSiteRef={formWebSiteRef}
+            isOpenModalHint={isOpenModalHint}
+            onCloseModalHint={onCloseModalHint}
+            handleIconWebsite={handleIconWebsite}
+            validateHint={validateHint}
+          />
+        }
+
+        {/* <Modal
           initialFocusRef={formWebSiteRef}
           finalFocusRef={formHintRef}
           isOpen={isOpenModalHint}
@@ -430,7 +452,7 @@ export default function Hint() {
               </Button>
             </ModalFooter>
           </ModalContent>
-        </Modal>
+        </Modal> */}
 
         <Modal
           isOpen={isOpenDeleteModalHint}
