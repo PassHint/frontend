@@ -1,42 +1,81 @@
-import axios from 'axios'
+import axios from 'axios';
 
-const urlDefault = 'http://localhost:3000'
+const urlDefault = 'http://localhost:3000';
+const axiosClass = axios.create();
+axiosClass.defaults.timeout = 8000;
 
 export const routes = {
-  create_user: async ({ username, password }: { username: string; password: string }) => {
-    return await axios.post(`${urlDefault}/users`, {
+  create_user: async ({
+    username,
+    password,
+  }: {
+    username: string;
+    password: string;
+  }) => {
+    const query = {
+      url: `${urlDefault}/users`,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       data: {
         username,
-        password
-      }
-    })
+        password,
+      },
+    };
+    return await axiosClass(query);
   },
-  login_user: async ({ username, password }: { username: string; password: string }) => {
-    return await axios.post(`${urlDefault}/login`, {
+  login_user: async ({
+    username,
+    password,
+  }: {
+    username: string;
+    password: string;
+  }) => {
+    const query = {
+      url: `${urlDefault}/login`,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       data: {
         username,
-        password
-      }
-    })
+        password,
+      },
+    };
+    return await axiosClass(query);
   },
-  create_hint: async ({ content, source, token }: { content: string; source: string, token: string }) => {
-    return await axios.get(`${urlDefault}/hints`, {
+  create_hint: async ({
+    content,
+    source,
+    token,
+  }: {
+    content: string;
+    source: string;
+    token: string;
+  }) => {
+    const query = {
+      url: `${urlDefault}/hints`,
+      method: 'POST',
       headers: {
         'Contenty-type': 'application/json',
-        authorization: token
+        authorization: token,
       },
       data: {
         content,
-        source
-      }
-    })
+        source,
+      },
+    };
+    return await axiosClass(query);
   },
   list_hints: async ({ token }: { token: string }) => {
-    return await axios.get(`${urlDefault}/hints`, {
+    const query = {
+      url: `${urlDefault}/hints`,
+      method: 'GET',
       headers: {
-        'Contenty-type': 'application/json',
-        authorization: token
-      }
-    })
+        authorization: token,
+      },
+    };
+    return await axiosClass(query);
   },
-}
+};

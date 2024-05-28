@@ -1,9 +1,7 @@
 import * as yup from 'yup';
 
 export const registerFormSchema = yup.object().shape({
-  username: yup
-    .string()
-    .required('O nome de usuário é obrigatório!'),
+  username: yup.string().required('O nome de usuário é obrigatório!'),
   password: yup
     .string()
     .matches(
@@ -17,15 +15,13 @@ export const registerFormSchema = yup.object().shape({
 });
 
 export const loginFormSchema = yup.object().shape({
-  username: yup
-    .string()
-    .required('O nome de usuário é obrigatório!'),
+  username: yup.string().required('O nome de usuário é obrigatório!'),
   password: yup.string().required('A senha é obrigatório!'),
 });
 
 export const hintFormSchema = yup.object().shape({
   website: yup.string().required('O site é obrigatório!'),
-  hit: yup
+  hint: yup
     .string()
     .min(3, 'Precisa ter no mínimo 3 caracteres!')
     .required('A dica é obrigatória'),

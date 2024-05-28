@@ -15,6 +15,8 @@ import { ValidationError } from 'yup';
 import { TemplateScreen } from '../../components/TemplateScreen/TemplateScreen';
 import { registerFormSchema } from '../../validation';
 import { routes } from '../../routes';
+import { AxiosError } from 'axios';
+import { sleep } from '../../utils';
 
 export default function Register() {
   const formUsernameRef = useRef<HTMLInputElement>(null);
@@ -54,13 +56,54 @@ export default function Register() {
       });
     }
 
-    await createUser({ username: usernameValue, password: passwordValue })
+    await createUser({ username: usernameValue, password: passwordValue });
   }
 
-  async function createUser({ username, password }: { username: string, password: string }) {
+  async function createUser({
+    username,
+    password,
+  }: {
+    username: string;
+    password: string;
+  }) {
     try {
-      const requestCreateUser = await routes.create_user({ username, password })
+      const { data: response, status } = await routes.create_user({
+        username,
+        password,
+      });
+      if (status !== 201) {
+        return toast({
+          title: 'Error!',
+          description: response.error.message,
+          status: 'warning',
+          duration: 2000,
+          position: 'top',
+          isClosable: true,
+        });
+      }
+      toast({
+        title: 'Sucesso!',
+        description: 'Conta criada com sucesso!',
+        status: 'success',
+        duration: 2000,
+        position: 'top',
+        isClosable: true,
+      });
+      await sleep(1000);
+      return (window.location.href = '/');
     } catch (error) {
+      if (error instanceof AxiosError) {
+        return toast({
+          title: 'Aviso!',
+          description:
+            error.response?.data.error.code == 1002 &&
+            'Nome de usuário já existe!',
+          status: 'warning',
+          duration: 2000,
+          position: 'top',
+          isClosable: true,
+        });
+      }
       return toast({
         title: 'Error!',
         description: 'Tipo de error não mapeado!',

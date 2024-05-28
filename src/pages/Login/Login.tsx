@@ -14,6 +14,8 @@ import { ValidationError } from 'yup';
 import { useRef } from 'react';
 import { TemplateScreen } from '../../components/TemplateScreen/TemplateScreen';
 import { loginFormSchema } from '../../validation';
+import { routes } from '../../routes';
+import { AxiosError } from 'axios';
 
 export default function Login() {
   const formUsernameRef = useRef<HTMLInputElement>(null);
@@ -21,8 +23,8 @@ export default function Login() {
   const toast = useToast();
 
   async function validateDate() {
-    const usernameValue = formUsernameRef.current?.value;
-    const passwordValue = formPassWordRef.current?.value;
+    const usernameValue = formUsernameRef.current?.value || '';
+    const passwordValue = formPassWordRef.current?.value || '';
 
     try {
       await loginFormSchema.validate({
@@ -34,6 +36,56 @@ export default function Login() {
         return toast({
           title: 'O formulário está incorreto!',
           description: error.message,
+          status: 'warning',
+          duration: 2000,
+          position: 'top',
+          isClosable: true,
+        });
+      }
+      return toast({
+        title: 'Error!',
+        description: 'Tipo de error não mapeado!',
+        status: 'warning',
+        duration: 2000,
+        position: 'top',
+        isClosable: true,
+      });
+    }
+    await loginUser({ username: usernameValue, password: passwordValue });
+  }
+
+  async function loginUser({
+    username,
+    password,
+  }: {
+    username: string;
+    password: string;
+  }) {
+    try {
+      const { data: response, status } = await routes.login_user({
+        username,
+        password,
+      });
+      if (status !== 200) {
+        return toast({
+          title: 'Error!',
+          description: response.error.message,
+          status: 'warning',
+          duration: 2000,
+          position: 'top',
+          isClosable: true,
+        });
+      }
+      localStorage.setItem('user', JSON.stringify(response.data));
+      return (window.location.href = '/hint');
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return toast({
+          title: 'Aviso!',
+          description:
+            (error.response?.data.error.code == 2001 ||
+              error.response?.data.error.code == 2002) &&
+            'Nome de usuário ou senha incorretas!',
           status: 'warning',
           duration: 2000,
           position: 'top',
@@ -105,7 +157,7 @@ export default function Login() {
               _hover={{ background: 'cyanX.100' }}
               onClick={validateDate}
             >
-              Registrar
+              Acessar
             </Button>
             <Box textAlign='center'>
               <FormHelperText textColor='cyanX.200'>

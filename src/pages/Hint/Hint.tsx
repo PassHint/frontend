@@ -24,13 +24,17 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
+import { ValidationError } from 'yup';
 import { AddIcon, QuestionIcon, SearchIcon } from '@chakra-ui/icons';
-import { useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { TemplateScreen } from '../../components/TemplateScreen/TemplateScreen';
 import { hintFormSchema } from '../../validation';
-import { ValidationError } from 'yup';
+import { routes } from '../../routes';
+import { InterfaceHints, InterfaceUser } from '../../interfaces';
 
 export default function Hint() {
+  const [hints, setHints] = useState<InterfaceHints[]>();
+  const [filterHints, setFilterHints] = useState<InterfaceHints[]>();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
   const [fiveIconWebsite, setFiveIconWebsite] = useState<string | null>(null);
@@ -39,15 +43,70 @@ export default function Hint() {
 
   const urlFiveIcon = `https://www.google.com/s2/favicons?domain=`;
 
+  const scroll = {
+    '&::-webkit-scrollbar': {
+      width: '4px',
+    },
+    '&::-webkit-scrollbar-track': {
+      width: '6px',
+    },
+    '&::-webkit-scrollbar-thumb': {
+      background: '#BABABA',
+      borderRadius: '24px',
+      scrollY: 10,
+    },
+  };
+
+  useEffect(() => {
+    async function listHint() {
+      const storageUser: InterfaceUser = JSON.parse(
+        localStorage.getItem('user') || ''
+      );
+      try {
+        const { data: response, status } = await routes.list_hints({
+          token: storageUser.token,
+        });
+        if (status !== 200) {
+          return toast({
+            title: 'Error!',
+            description: response.error.message,
+            status: 'warning',
+            duration: 2000,
+            position: 'top',
+            isClosable: true,
+          });
+        }
+        console.log(response.data);
+        setHints(response.data);
+      } catch (error) {
+        return toast({
+          title: 'Error!',
+          description: 'Não foi possível listar as dicas!',
+          status: 'warning',
+          duration: 2000,
+          position: 'top',
+          isClosable: true,
+        });
+      }
+    }
+
+    (async () => {
+      await listHint();
+    })();
+  }, [toast]);
+
   async function handleIconWebsite() {
     const websiteValue = formWebSiteRef.current?.value;
     return setFiveIconWebsite(`${urlFiveIcon}${websiteValue}`);
   }
 
-  async function createHint() {
-    const websiteValue = formWebSiteRef.current?.value;
-    const hintValue = formHintRef.current?.value;
+  async function validateHint() {
+    const storageUser: InterfaceUser = JSON.parse(
+      localStorage.getItem('user') || ''
+    );
 
+    const websiteValue = formWebSiteRef.current?.value || '';
+    const hintValue = formHintRef.current?.value || '';
     try {
       await hintFormSchema.validate({
         website: websiteValue,
@@ -73,6 +132,65 @@ export default function Hint() {
         isClosable: true,
       });
     }
+
+    await createHint({
+      website: websiteValue,
+      hint: hintValue,
+      token: storageUser.token,
+    });
+  }
+
+  async function createHint({
+    website,
+    hint,
+    token,
+  }: {
+    website: string;
+    hint: string;
+    token: string;
+  }) {
+    try {
+      const { data: response, status } = await routes.create_hint({
+        source: website,
+        content: hint,
+        token,
+      });
+      if (status !== 200) {
+        return toast({
+          title: 'Error!',
+          description: response.error.message,
+          status: 'warning',
+          duration: 2000,
+          position: 'top',
+          isClosable: true,
+        });
+      }
+      setHints([...(hints || []), response.data]);
+      return toast({
+        title: 'Sucesso!',
+        description: 'Dica criada com sucesso!',
+        status: 'success',
+        duration: 2000,
+        position: 'top',
+        isClosable: true,
+      });
+    } catch (error) {
+      return toast({
+        title: 'Error!',
+        description: 'Tipo de error não mapeado!',
+        status: 'warning',
+        duration: 2000,
+        position: 'top',
+        isClosable: true,
+      });
+    }
+  }
+
+  async function searchHint(event: ChangeEvent<HTMLInputElement>) {
+    const value = event.target.value;
+    const regex = new RegExp(value, 'gi');
+    const filter = hints?.filter((hint) => regex.test(hint.source));
+    setFilterHints(filter);
   }
 
   return (
@@ -93,6 +211,7 @@ export default function Hint() {
             </InputLeftAddon>
             <Input
               type='text'
+              onChange={(event) => searchHint(event)}
               placeholder='Buscar pelo site'
               _focus={{ boxShadow: 'none', borderColor: 'cyanX.100' }}
             />
@@ -107,31 +226,60 @@ export default function Hint() {
             <AddIcon textColor='whiteX.100' />
           </Button>
         </Flex>
-        <Accordion
-          allowToggle
-          display='flex'
-          flexDirection='column'
-          gap='1rem'
+        <Box
+          overflowY='scroll'
+          height='25rem'
+          css={scroll}
+          paddingRight='.5rem'
         >
-          <AccordionItem
-            border='1px solid'
-            borderColor='blackX.200'
-            borderRadius='5px'
+          <Accordion
+            allowToggle
+            display='flex'
+            flexDirection='column'
+            gap='1rem'
           >
-            <AccordionButton>
-              <Box as='span' flex='1' textAlign='left'>
-                Section 1 title
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-            <AccordionPanel marginLeft='1rem' textAlign='justify'>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat.
-            </AccordionPanel>
-          </AccordionItem>
-        </Accordion>
+            {filterHints?.length
+              ? filterHints.map((hint) => (
+                  <AccordionItem
+                    key={hint.id}
+                    border='1px solid'
+                    borderColor='blackX.200'
+                    borderRadius='5px'
+                  >
+                    <AccordionButton display='flex' gap='.5rem'>
+                      <Image src={`${urlFiveIcon}${hint.source}`} />
+                      <Box as='span' flex='1' textAlign='left'>
+                        {hint.source}
+                      </Box>
+                      <AccordionIcon />
+                    </AccordionButton>
+                    <AccordionPanel marginLeft='1rem' textAlign='justify'>
+                      {hint.content}
+                    </AccordionPanel>
+                  </AccordionItem>
+                ))
+              : hints &&
+                hints.map((hint) => (
+                  <AccordionItem
+                    key={hint.id}
+                    border='1px solid'
+                    borderColor='blackX.200'
+                    borderRadius='5px'
+                  >
+                    <AccordionButton display='flex' gap='.5rem'>
+                      <Image src={`${urlFiveIcon}${hint.source}`} />
+                      <Box as='span' flex='1' textAlign='left'>
+                        {hint.source}
+                      </Box>
+                      <AccordionIcon />
+                    </AccordionButton>
+                    <AccordionPanel marginLeft='1rem' textAlign='justify'>
+                      {hint.content}
+                    </AccordionPanel>
+                  </AccordionItem>
+                ))}
+          </Accordion>
+        </Box>
 
         <Modal
           initialFocusRef={formWebSiteRef}
@@ -161,7 +309,7 @@ export default function Hint() {
                   <Input
                     type='text'
                     ref={formWebSiteRef}
-                    placeholder='https://google.com'
+                    placeholder='google.com'
                     onBlur={handleIconWebsite}
                     _focus={{ boxShadow: 'none', borderColor: 'cyanX.100' }}
                   />
@@ -180,7 +328,7 @@ export default function Hint() {
 
             <ModalFooter>
               <Button
-                onClick={createHint}
+                onClick={validateHint}
                 mr={3}
                 background='cyanX.200'
                 textColor='whiteX.100'
