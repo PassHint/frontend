@@ -78,4 +78,21 @@ export const routes = {
     };
     return await axiosClass(query);
   },
+  delete_hint: async ({
+    id,
+    token,
+  }: {
+    id: number;
+    token: string;
+  }) => {
+    const query = {
+      url: `${urlDefault}/hints/${id}`,
+      method: 'DELETe',
+      headers: {
+        'Contenty-type': 'application/json',
+        authorization: token,
+      },
+    };
+    return await axiosClass(query);
+  },
 };

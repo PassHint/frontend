@@ -4,7 +4,7 @@ export interface InterfaceUser {
   token: string;
 }
 
-export interface InterfaceHints {
+export interface InterfaceHint {
   id: number;
   content: string;
   source: string;
