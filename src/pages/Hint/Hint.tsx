@@ -22,20 +22,38 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { ValidationError } from 'yup';
-import { AddIcon, DeleteIcon, QuestionIcon, SearchIcon } from '@chakra-ui/icons';
+import {
+  AddIcon,
+  DeleteIcon,
+  QuestionIcon,
+  SearchIcon,
+} from '@chakra-ui/icons';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { TemplateScreen } from '../../components/TemplateScreen/TemplateScreen';
 import { hintFormSchema } from '../../validation';
 import { routes } from '../../routes';
 import { InterfaceHint, InterfaceUser } from '../../interfaces';
-import HintModal from '../../components/HintModal';
+import { HintModal, HintModalEdit } from '../../components/HintModal';
 
 export default function Hint() {
   const [hints, setHints] = useState<InterfaceHint[]>([]);
   const [hintFocus, setHintFocus] = useState<InterfaceHint>();
   const [filterHints, setFilterHints] = useState<InterfaceHint[]>();
-  const { isOpen: isOpenModalHint, onOpen: onOpenModalHint, onClose: onCloseModalHint } = useDisclosure();
-  const { isOpen: isOpenDeleteModalHint, onOpen: onOpenDeleteModalHint, onClose: onCloseDeleteModalHint } = useDisclosure();
+  const {
+    isOpen: isOpenModalHint,
+    onOpen: onOpenModalHint,
+    onClose: onCloseModalHint,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenModalEditHint,
+    onOpen: onOpenModalEditHint,
+    onClose: onCloseModalEditHint,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenDeleteModalHint,
+    onOpen: onOpenDeleteModalHint,
+    onClose: onCloseDeleteModalHint,
+  } = useDisclosure();
   const toast = useToast();
   const [fiveIconWebsite, setFiveIconWebsite] = useState<string | null>(null);
   const formWebSiteRef = useRef<HTMLInputElement>(null);
@@ -92,14 +110,14 @@ export default function Hint() {
     (async () => {
       await listHint();
     })();
-  }, [toast]);
+  }, []);
 
   async function handleIconWebsite() {
     const websiteValue = formWebSiteRef.current?.value;
     return setFiveIconWebsite(`${urlFiveIcon}${websiteValue}`);
   }
 
-  async function validateHint() {
+  async function validateHint({ isEdit }: { isEdit: boolean }) {
     const storageUser: InterfaceUser = JSON.parse(
       localStorage.getItem('user') || ''
     );
@@ -132,7 +150,15 @@ export default function Hint() {
       });
     }
 
-    await createHint({
+    if (isEdit) {
+      return await editHint({
+        id: hintFocus!.id,
+        website: websiteValue,
+        hint: hintValue,
+        token: storageUser.token,
+      });
+    }
+    return await createHint({
       website: websiteValue,
       hint: hintValue,
       token: storageUser.token,
@@ -165,7 +191,7 @@ export default function Hint() {
         });
       }
       setHints([...(hints || []), response.data]);
-      onCloseModalHint()
+      onCloseModalHint();
       return toast({
         title: 'Sucesso!',
         description: 'Dica criada com sucesso!',
@@ -186,7 +212,57 @@ export default function Hint() {
     }
   }
 
-  async function deleteHint()  {
+  async function editHint({
+    id,
+    website,
+    hint,
+    token,
+  }: {
+    id: number;
+    website: string;
+    hint: string;
+    token: string;
+  }) {
+    try {
+      const { data: response, status } = await routes.edit_hint({
+        id,
+        source: website,
+        content: hint,
+        token,
+      });
+      if (status === 400) {
+        return toast({
+          title: 'Error!',
+          description: response.error.message,
+          status: 'warning',
+          duration: 2000,
+          position: 'top',
+          isClosable: true,
+        });
+      }
+      await listHint();
+      onCloseModalEditHint();
+      return toast({
+        title: 'Sucesso!',
+        description: 'Dica atualizada com sucesso!',
+        status: 'success',
+        duration: 2000,
+        position: 'top',
+        isClosable: true,
+      });
+    } catch (error) {
+      return toast({
+        title: 'Error!',
+        description: 'Tipo de error não mapeado!',
+        status: 'warning',
+        duration: 2000,
+        position: 'top',
+        isClosable: true,
+      });
+    }
+  }
+
+  async function deleteHint() {
     const storageUser: InterfaceUser = JSON.parse(
       localStorage.getItem('user') || ''
     );
@@ -194,10 +270,10 @@ export default function Hint() {
     try {
       const { data: response, status } = await routes.delete_hint({
         id: hintFocus!.id,
-        token: storageUser.token
+        token: storageUser.token,
       });
       if (status === 404) {
-        onCloseDeleteModalHint()
+        onCloseDeleteModalHint();
         return toast({
           title: 'Error!',
           description: 'não foi possível deletar a dica!',
@@ -208,7 +284,7 @@ export default function Hint() {
         });
       }
       if (status !== 204) {
-        onCloseDeleteModalHint()
+        onCloseDeleteModalHint();
         return toast({
           title: 'Error!',
           description: response.error.message,
@@ -218,8 +294,8 @@ export default function Hint() {
           isClosable: true,
         });
       }
-      onCloseDeleteModalHint()
-      await listHint()
+      onCloseDeleteModalHint();
+      await listHint();
       return toast({
         title: 'Sucesso!',
         description: 'Dica deletada com sucesso!',
@@ -241,13 +317,13 @@ export default function Hint() {
   }
 
   async function openHintModel(hint?: InterfaceHint) {
-    if(hint) {
-      setHintFocus(hint)
-      onOpenModalHint()
+    if (hint) {
+      setHintFocus(hint);
+      onOpenModalEditHint();
     } else {
-      setHintFocus(undefined)
-      setFiveIconWebsite(null)
-      onOpenModalHint()
+      setHintFocus(undefined);
+      setFiveIconWebsite(null);
+      onOpenModalHint();
     }
   }
 
@@ -339,19 +415,25 @@ export default function Hint() {
                       <AccordionIcon />
                     </AccordionButton>
                     <AccordionPanel marginLeft='1rem' textAlign='justify'>
-                      <Flex flexDirection="row" justifyItems='top' gap="1rem" justifyContent='space-between'>
-                        <Text>
-                          {hint.content}
-                        </Text>
-                        <Flex flexDirection='column' gap=".5rem">
+                      <Flex
+                        flexDirection='row'
+                        justifyItems='top'
+                        gap='1rem'
+                        justifyContent='space-between'
+                      >
+                        <Text>{hint.content}</Text>
+                        <Flex flexDirection='column' gap='.5rem'>
                           <Button
                             background='transparent'
                             padding='0'
                             _hover={{ background: 'cyanX.100' }}
                             _focus={{ background: 'cyanX.100' }}
-                            onClick={() => {setHintFocus(hint); onOpenDeleteModalHint()}}
+                            onClick={() => {
+                              setHintFocus(hint);
+                              onOpenDeleteModalHint();
+                            }}
                           >
-                            <DeleteIcon textColor='whiteX.100'/>
+                            <DeleteIcon textColor='whiteX.100' />
                           </Button>
                           <Button
                             background='transparent'
@@ -360,7 +442,7 @@ export default function Hint() {
                             _focus={{ background: 'cyanX.100' }}
                             onClick={() => openHintModel(hint)}
                           >
-                            <QuestionIcon textColor='whiteX.100'/>
+                            <QuestionIcon textColor='whiteX.100' />
                           </Button>
                         </Flex>
                       </Flex>
@@ -370,8 +452,8 @@ export default function Hint() {
           </Accordion>
         </Box>
 
-        {
-          isOpenModalHint && <HintModal
+        {isOpenModalHint && (
+          <HintModal
             hint={hintFocus}
             fiveIconWebsite={fiveIconWebsite}
             formHintRef={formHintRef}
@@ -379,80 +461,22 @@ export default function Hint() {
             isOpenModalHint={isOpenModalHint}
             onCloseModalHint={onCloseModalHint}
             handleIconWebsite={handleIconWebsite}
-            validateHint={validateHint}
+            validateHint={() => validateHint({ isEdit: false })}
           />
-        }
+        )}
 
-        {/* <Modal
-          initialFocusRef={formWebSiteRef}
-          finalFocusRef={formHintRef}
-          isOpen={isOpenModalHint}
-          onClose={onCloseModalHint}
-        >
-          <ModalOverlay />
-          <ModalContent
-            width='20rem'
-            background='blackX.100'
-            textColor='whiteX.100'
-          >
-            <ModalHeader>Crie a dica:</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody pb={6}>
-              <FormControl>
-                <FormLabel>Site da senha:</FormLabel>
-                <InputGroup>
-                  <InputLeftAddon background='transparent' padding='.5rem'>
-                    {fiveIconWebsite ? (
-                      <Image src={fiveIconWebsite} />
-                    ) : (
-                      <QuestionIcon />
-                    )}
-                  </InputLeftAddon>
-                  <Input
-                    type='text'
-                    ref={formWebSiteRef}
-                    placeholder='google.com'
-                    onBlur={handleIconWebsite}
-                    _focus={{ boxShadow: 'none', borderColor: 'cyanX.100' }}
-                  />
-                </InputGroup>
-              </FormControl>
-              <FormControl mt={4}>
-                <FormLabel>Dica da senha:</FormLabel>
-                <Textarea
-                  ref={formHintRef}
-                  height='8rem'
-                  placeholder='Dica da senha'
-                  _focus={{ boxShadow: 'none', borderColor: 'cyanX.100' }}
-                />
-              </FormControl>
-            </ModalBody>
-
-            <ModalFooter>
-              <Button
-                onClick={validateHint}
-                mr={3}
-                background='cyanX.200'
-                textColor='whiteX.100'
-                fontWeight='normal'
-                letterSpacing='.9px'
-                _hover={{ background: 'cyanX.100' }}
-              >
-                Salvar
-              </Button>
-              <Button
-                onClick={onCloseModalHint}
-                background='blackX.200'
-                textColor='whiteX.100'
-                fontWeight='normal'
-                letterSpacing='.9px'
-                _hover={{ background: 'cyanX.100' }}
-              >
-                Cancelar
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal> */}
+        {isOpenModalEditHint && (
+          <HintModalEdit
+            hint={hintFocus}
+            fiveIconWebsite={fiveIconWebsite}
+            formHintRef={formHintRef}
+            formWebSiteRef={formWebSiteRef}
+            isOpenModalHint={isOpenModalEditHint}
+            onCloseModalHint={onCloseModalEditHint}
+            handleIconWebsite={handleIconWebsite}
+            validateHint={() => validateHint({ isEdit: true })}
+          />
+        )}
 
         <Modal
           isOpen={isOpenDeleteModalHint}

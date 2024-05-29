@@ -78,19 +78,38 @@ export const routes = {
     };
     return await axiosClass(query);
   },
-  delete_hint: async ({
+  delete_hint: async ({ id, token }: { id: number; token: string }) => {
+    const query = {
+      url: `${urlDefault}/hints/${id}`,
+      method: 'DELETE',
+      headers: {
+        'Contenty-type': 'application/json',
+        authorization: token,
+      },
+    };
+    return await axiosClass(query);
+  },
+  edit_hint: async ({
     id,
+    content,
+    source,
     token,
   }: {
     id: number;
+    content: string;
+    source: string;
     token: string;
   }) => {
     const query = {
       url: `${urlDefault}/hints/${id}`,
-      method: 'DELETe',
+      method: 'PUT',
       headers: {
         'Contenty-type': 'application/json',
         authorization: token,
+      },
+      data: {
+        content,
+        source,
       },
     };
     return await axiosClass(query);
