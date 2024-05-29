@@ -395,7 +395,37 @@ export default function Hint() {
                       <AccordionIcon />
                     </AccordionButton>
                     <AccordionPanel marginLeft='1rem' textAlign='justify'>
-                      {hint.content}
+                      <Flex
+                        flexDirection='row'
+                        justifyItems='top'
+                        gap='1rem'
+                        justifyContent='space-between'
+                      >
+                        <Text>{hint.content}</Text>
+                        <Flex flexDirection='column' gap='.5rem'>
+                          <Button
+                            background='transparent'
+                            padding='0'
+                            _hover={{ background: 'cyanX.100' }}
+                            _focus={{ background: 'cyanX.100' }}
+                            onClick={() => {
+                              setHintFocus(hint);
+                              onOpenDeleteModalHint();
+                            }}
+                          >
+                            <DeleteIcon textColor='whiteX.100' />
+                          </Button>
+                          <Button
+                            background='transparent'
+                            padding='0'
+                            _hover={{ background: 'cyanX.100' }}
+                            _focus={{ background: 'cyanX.100' }}
+                            onClick={() => openHintModel(hint)}
+                          >
+                            <QuestionIcon textColor='whiteX.100' />
+                          </Button>
+                        </Flex>
+                      </Flex>
                     </AccordionPanel>
                   </AccordionItem>
                 ))
