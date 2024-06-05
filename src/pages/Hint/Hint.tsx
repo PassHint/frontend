@@ -12,6 +12,7 @@ import {
   InputGroup,
   InputLeftAddon,
   Modal,
+  ModalBody,
   ModalCloseButton,
   ModalContent,
   ModalFooter,
@@ -20,25 +21,27 @@ import {
   Text,
   useDisclosure,
   useToast,
-} from '@chakra-ui/react';
-import { ValidationError } from 'yup';
+} from "@chakra-ui/react";
+import { ValidationError } from "yup";
 import {
   AddIcon,
   DeleteIcon,
   QuestionIcon,
   SearchIcon,
-} from '@chakra-ui/icons';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { TemplateScreen } from '../../components/TemplateScreen/TemplateScreen';
-import { hintFormSchema } from '../../validation';
-import { routes } from '../../routes';
-import { InterfaceHint, InterfaceUser } from '../../interfaces';
-import { HintModal, HintModalEdit } from '../../components/HintModal';
+} from "@chakra-ui/icons";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { TemplateScreen } from "../../components/TemplateScreen/TemplateScreen";
+import { hintFormSchema } from "../../validation";
+import { routes } from "../../routes";
+import { InterfaceHint, InterfaceUser } from "../../interfaces";
+import { HintModal, HintModalEdit } from "../../components/HintModal";
 
 export default function Hint() {
   const [hints, setHints] = useState<InterfaceHint[]>([]);
   const [hintFocus, setHintFocus] = useState<InterfaceHint>();
   const [filterHints, setFilterHints] = useState<InterfaceHint[]>();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   const {
     isOpen: isOpenModalHint,
     onOpen: onOpenModalHint,
@@ -62,22 +65,22 @@ export default function Hint() {
   const urlFiveIcon = `https://www.google.com/s2/favicons?domain=`;
 
   const scroll = {
-    '&::-webkit-scrollbar': {
-      width: '4px',
+    "&::-webkit-scrollbar": {
+      width: "4px",
     },
-    '&::-webkit-scrollbar-track': {
-      width: '6px',
+    "&::-webkit-scrollbar-track": {
+      width: "6px",
     },
-    '&::-webkit-scrollbar-thumb': {
-      background: '#BABABA',
-      borderRadius: '24px',
+    "&::-webkit-scrollbar-thumb": {
+      background: "#BABABA",
+      borderRadius: "24px",
       scrollY: 10,
     },
   };
 
   async function listHint() {
     const storageUser: InterfaceUser = JSON.parse(
-      localStorage.getItem('user') || ''
+      localStorage.getItem("user") || ""
     );
     try {
       const { data: response, status } = await routes.list_hints({
@@ -85,22 +88,22 @@ export default function Hint() {
       });
       if (status !== 200) {
         return toast({
-          title: 'Error!',
+          title: "Error!",
           description: response.error.message,
-          status: 'warning',
+          status: "warning",
           duration: 2000,
-          position: 'top',
+          position: "top",
           isClosable: true,
         });
       }
       setHints(response.data);
     } catch (error) {
       return toast({
-        title: 'Error!',
-        description: 'Não foi possível listar as dicas!',
-        status: 'warning',
+        title: "Error!",
+        description: "Não foi possível listar as dicas!",
+        status: "warning",
         duration: 2000,
-        position: 'top',
+        position: "top",
         isClosable: true,
       });
     }
@@ -119,11 +122,11 @@ export default function Hint() {
 
   async function validateHint({ isEdit }: { isEdit: boolean }) {
     const storageUser: InterfaceUser = JSON.parse(
-      localStorage.getItem('user') || ''
+      localStorage.getItem("user") || ""
     );
 
-    const websiteValue = formWebSiteRef.current?.value || '';
-    const hintValue = formHintRef.current?.value || '';
+    const websiteValue = formWebSiteRef.current?.value || "";
+    const hintValue = formHintRef.current?.value || "";
     try {
       await hintFormSchema.validate({
         website: websiteValue,
@@ -132,20 +135,20 @@ export default function Hint() {
     } catch (error) {
       if (error instanceof ValidationError) {
         return toast({
-          title: 'O formulário está incorreto!',
+          title: "O formulário está incorreto!",
           description: error.message,
-          status: 'warning',
+          status: "warning",
           duration: 2000,
-          position: 'top',
+          position: "top",
           isClosable: true,
         });
       }
       return toast({
-        title: 'Error!',
-        description: 'Tipo de error não mapeado!',
-        status: 'warning',
+        title: "Error!",
+        description: "Tipo de error não mapeado!",
+        status: "warning",
         duration: 2000,
-        position: 'top',
+        position: "top",
         isClosable: true,
       });
     }
@@ -182,31 +185,31 @@ export default function Hint() {
       });
       if (status !== 200) {
         return toast({
-          title: 'Error!',
+          title: "Error!",
           description: response.error.message,
-          status: 'warning',
+          status: "warning",
           duration: 2000,
-          position: 'top',
+          position: "top",
           isClosable: true,
         });
       }
       setHints([...(hints || []), response.data]);
       onCloseModalHint();
       return toast({
-        title: 'Sucesso!',
-        description: 'Dica criada com sucesso!',
-        status: 'success',
+        title: "Sucesso!",
+        description: "Dica criada com sucesso!",
+        status: "success",
         duration: 2000,
-        position: 'top',
+        position: "top",
         isClosable: true,
       });
     } catch (error) {
       return toast({
-        title: 'Error!',
-        description: 'Tipo de error não mapeado!',
-        status: 'warning',
+        title: "Error!",
+        description: "Tipo de error não mapeado!",
+        status: "warning",
         duration: 2000,
-        position: 'top',
+        position: "top",
         isClosable: true,
       });
     }
@@ -232,31 +235,31 @@ export default function Hint() {
       });
       if (status === 400) {
         return toast({
-          title: 'Error!',
+          title: "Error!",
           description: response.error.message,
-          status: 'warning',
+          status: "warning",
           duration: 2000,
-          position: 'top',
+          position: "top",
           isClosable: true,
         });
       }
       await listHint();
       onCloseModalEditHint();
       return toast({
-        title: 'Sucesso!',
-        description: 'Dica atualizada com sucesso!',
-        status: 'success',
+        title: "Sucesso!",
+        description: "Dica atualizada com sucesso!",
+        status: "success",
         duration: 2000,
-        position: 'top',
+        position: "top",
         isClosable: true,
       });
     } catch (error) {
       return toast({
-        title: 'Error!',
-        description: 'Tipo de error não mapeado!',
-        status: 'warning',
+        title: "Error!",
+        description: "Tipo de error não mapeado!",
+        status: "warning",
         duration: 2000,
-        position: 'top',
+        position: "top",
         isClosable: true,
       });
     }
@@ -264,7 +267,7 @@ export default function Hint() {
 
   async function deleteHint() {
     const storageUser: InterfaceUser = JSON.parse(
-      localStorage.getItem('user') || ''
+      localStorage.getItem("user") || ""
     );
 
     try {
@@ -275,42 +278,42 @@ export default function Hint() {
       if (status === 404) {
         onCloseDeleteModalHint();
         return toast({
-          title: 'Error!',
-          description: 'não foi possível deletar a dica!',
-          status: 'warning',
+          title: "Error!",
+          description: "não foi possível deletar a dica!",
+          status: "warning",
           duration: 2000,
-          position: 'top',
+          position: "top",
           isClosable: true,
         });
       }
       if (status !== 204) {
         onCloseDeleteModalHint();
         return toast({
-          title: 'Error!',
+          title: "Error!",
           description: response.error.message,
-          status: 'warning',
+          status: "warning",
           duration: 2000,
-          position: 'top',
+          position: "top",
           isClosable: true,
         });
       }
       onCloseDeleteModalHint();
       await listHint();
       return toast({
-        title: 'Sucesso!',
-        description: 'Dica deletada com sucesso!',
-        status: 'success',
+        title: "Sucesso!",
+        description: "Dica deletada com sucesso!",
+        status: "success",
         duration: 2000,
-        position: 'top',
+        position: "top",
         isClosable: true,
       });
     } catch (error) {
       return toast({
-        title: 'Error!',
-        description: 'Tipo de error não mapeado!',
-        status: 'warning',
+        title: "Error!",
+        description: "Tipo de error não mapeado!",
+        status: "warning",
         duration: 2000,
-        position: 'top',
+        position: "top",
         isClosable: true,
       });
     }
@@ -329,7 +332,7 @@ export default function Hint() {
 
   async function searchHint(event: ChangeEvent<HTMLInputElement>) {
     const value = event.target.value;
-    const regex = new RegExp(value, 'gi');
+    const regex = new RegExp(value, "gi");
     const filter = hints?.filter((hint) => regex.test(hint.source));
     setFilterHints(filter);
   }
@@ -337,92 +340,102 @@ export default function Hint() {
   return (
     <TemplateScreen>
       <Box
-        boxShadow='xs'
-        border='1px solid'
-        borderColor='cyanX.100'
-        p='6'
-        width='45rem'
-        rounded='md'
-        textColor='whiteX.100'
+        boxShadow="xs"
+        border="1px solid"
+        borderColor="cyanX.100"
+        p="6"
+        width="45rem"
+        rounded="md"
+        textColor="whiteX.100"
       >
-        <Flex gap='1rem' marginBottom='3rem'>
+        <Flex gap="1rem" marginBottom="3rem">
           <InputGroup>
-            <InputLeftAddon background='transparent' padding='.5rem'>
+            <InputLeftAddon background="transparent" padding=".5rem">
               <SearchIcon />
             </InputLeftAddon>
             <Input
-              type='text'
+              type="text"
               onChange={(event) => searchHint(event)}
-              placeholder='Buscar pelo site'
-              _focus={{ boxShadow: 'none', borderColor: 'cyanX.100' }}
+              placeholder="Buscar pelo site"
+              _focus={{ boxShadow: "none", borderColor: "cyanX.100" }}
             />
           </InputGroup>
           <Button
-            background='transparent'
-            padding='0'
-            _hover={{ background: 'cyanX.100' }}
-            _focus={{ background: 'cyanX.100' }}
+            background="transparent"
+            padding="0"
+            _hover={{ background: "cyanX.100" }}
+            _focus={{ background: "cyanX.100" }}
             onClick={() => openHintModel()}
           >
-            <AddIcon textColor='whiteX.100' />
+            <AddIcon textColor="whiteX.100" />
+          </Button>
+          <Button
+            background="transparent"
+            padding="0"
+            _hover={{ background: "cyanX.100" }}
+            _focus={{ background: "cyanX.100" }}
+            color={"#ffff"}
+            onClick={onOpen}
+          >
+            ?
           </Button>
         </Flex>
         <Box
-          overflowY='scroll'
-          height='25rem'
+          overflowY="scroll"
+          height="25rem"
           css={scroll}
-          paddingRight='.5rem'
+          paddingRight=".5rem"
         >
           <Accordion
             allowToggle
-            display='flex'
-            flexDirection='column'
-            gap='1rem'
+            display="flex"
+            flexDirection="column"
+            gap="1rem"
           >
             {filterHints?.length
               ? filterHints.map((hint) => (
                   <AccordionItem
                     key={hint.id}
-                    border='1px solid'
-                    borderColor='blackX.200'
-                    borderRadius='5px'
+                    border="1px solid"
+                    borderColor="blackX.200"
+                    borderRadius="5px"
                   >
-                    <AccordionButton display='flex' gap='.5rem'>
+                    <AccordionButton display="flex" gap=".5rem">
                       <Image src={`${urlFiveIcon}${hint.source}`} />
-                      <Box as='span' flex='1' textAlign='left'>
+                      <Box as="span" flex="1" textAlign="left">
                         {hint.source}
                       </Box>
                       <AccordionIcon />
                     </AccordionButton>
-                    <AccordionPanel marginLeft='1rem' textAlign='justify'>
+                    <AccordionPanel marginLeft="1rem" textAlign="justify">
                       <Flex
-                        flexDirection='row'
-                        justifyItems='top'
-                        gap='1rem'
-                        justifyContent='space-between'
+                        flexDirection="row"
+                        justifyItems="top"
+                        gap="1rem"
+                        justifyContent="space-between"
                       >
                         <Text>{hint.content}</Text>
-                        <Flex flexDirection='column' gap='.5rem'>
+                        <Flex flexDirection="column" gap=".5rem">
                           <Button
-                            background='transparent'
-                            padding='0'
-                            _hover={{ background: 'cyanX.100' }}
-                            _focus={{ background: 'cyanX.100' }}
+                            background="transparent"
+                            padding="0"
+                            _hover={{ background: "cyanX.100" }}
+                            _focus={{ background: "cyanX.100" }}
                             onClick={() => {
                               setHintFocus(hint);
                               onOpenDeleteModalHint();
                             }}
                           >
-                            <DeleteIcon textColor='whiteX.100' />
+                            <DeleteIcon textColor="whiteX.100" />
                           </Button>
                           <Button
-                            background='transparent'
-                            padding='0'
-                            _hover={{ background: 'cyanX.100' }}
-                            _focus={{ background: 'cyanX.100' }}
+                            background="transparent"
+                            padding="0"
+                            _hover={{ background: "cyanX.100" }}
+                            _focus={{ background: "cyanX.100" }}
                             onClick={() => openHintModel(hint)}
                           >
-                            <QuestionIcon textColor='whiteX.100' />
+                            <QuestionIcon textColor="whiteX.100" />
                           </Button>
                         </Flex>
                       </Flex>
@@ -433,46 +446,46 @@ export default function Hint() {
                 hints.map((hint) => (
                   <AccordionItem
                     key={hint.id}
-                    border='1px solid'
-                    borderColor='blackX.200'
-                    borderRadius='5px'
+                    border="1px solid"
+                    borderColor="blackX.200"
+                    borderRadius="5px"
                   >
-                    <AccordionButton display='flex' gap='.5rem'>
+                    <AccordionButton display="flex" gap=".5rem">
                       <Image src={`${urlFiveIcon}${hint.source}`} />
-                      <Box as='span' flex='1' textAlign='left'>
+                      <Box as="span" flex="1" textAlign="left">
                         {hint.source}
                       </Box>
                       <AccordionIcon />
                     </AccordionButton>
-                    <AccordionPanel marginLeft='1rem' textAlign='justify'>
+                    <AccordionPanel marginLeft="1rem" textAlign="justify">
                       <Flex
-                        flexDirection='row'
-                        justifyItems='top'
-                        gap='1rem'
-                        justifyContent='space-between'
+                        flexDirection="row"
+                        justifyItems="top"
+                        gap="1rem"
+                        justifyContent="space-between"
                       >
                         <Text>{hint.content}</Text>
-                        <Flex flexDirection='column' gap='.5rem'>
+                        <Flex flexDirection="column" gap=".5rem">
                           <Button
-                            background='transparent'
-                            padding='0'
-                            _hover={{ background: 'cyanX.100' }}
-                            _focus={{ background: 'cyanX.100' }}
+                            background="transparent"
+                            padding="0"
+                            _hover={{ background: "cyanX.100" }}
+                            _focus={{ background: "cyanX.100" }}
                             onClick={() => {
                               setHintFocus(hint);
                               onOpenDeleteModalHint();
                             }}
                           >
-                            <DeleteIcon textColor='whiteX.100' />
+                            <DeleteIcon textColor="whiteX.100" />
                           </Button>
                           <Button
-                            background='transparent'
-                            padding='0'
-                            _hover={{ background: 'cyanX.100' }}
-                            _focus={{ background: 'cyanX.100' }}
+                            background="transparent"
+                            padding="0"
+                            _hover={{ background: "cyanX.100" }}
+                            _focus={{ background: "cyanX.100" }}
                             onClick={() => openHintModel(hint)}
                           >
-                            <QuestionIcon textColor='whiteX.100' />
+                            <QuestionIcon textColor="whiteX.100" />
                           </Button>
                         </Flex>
                       </Flex>
@@ -508,15 +521,12 @@ export default function Hint() {
           />
         )}
 
-        <Modal
-          isOpen={isOpenDeleteModalHint}
-          onClose={onCloseDeleteModalHint}
-        >
+        <Modal isOpen={isOpenDeleteModalHint} onClose={onCloseDeleteModalHint}>
           <ModalOverlay />
           <ModalContent
-            width='20rem'
-            background='blackX.100'
-            textColor='whiteX.100'
+            width="20rem"
+            background="blackX.100"
+            textColor="whiteX.100"
           >
             <ModalHeader>Deletar dica?</ModalHeader>
             <ModalCloseButton />
@@ -524,21 +534,21 @@ export default function Hint() {
               <Button
                 onClick={deleteHint}
                 mr={3}
-                background='cyanX.200'
-                textColor='whiteX.100'
-                fontWeight='normal'
-                letterSpacing='.9px'
-                _hover={{ background: 'cyanX.100' }}
+                background="cyanX.200"
+                textColor="whiteX.100"
+                fontWeight="normal"
+                letterSpacing=".9px"
+                _hover={{ background: "cyanX.100" }}
               >
                 Deletar
               </Button>
               <Button
                 onClick={onCloseDeleteModalHint}
-                background='blackX.200'
-                textColor='whiteX.100'
-                fontWeight='normal'
-                letterSpacing='.9px'
-                _hover={{ background: 'cyanX.100' }}
+                background="blackX.200"
+                textColor="whiteX.100"
+                fontWeight="normal"
+                letterSpacing=".9px"
+                _hover={{ background: "cyanX.100" }}
               >
                 Cancelar
               </Button>
@@ -546,6 +556,40 @@ export default function Hint() {
           </ModalContent>
         </Modal>
       </Box>
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent
+          width="60rem"
+          background="blackX.100"
+          textColor="whiteX.100"
+        >
+          <ModalHeader>Dica de uma senha forte</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            Para criar uma senha forte, siga estas dicas: use no mínimo 8
+            caracteres, combinando letras maiúsculas e minúsculas, números e
+            simbolos especiais. Evite sequencias óbvias, datas de aniversário,
+            nomes de familiares ou palavras comuns.
+            <Input onChange={(event) => console.log(event.target.value)} />
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              colorScheme="blue"
+              mr={3}
+              onClick={onClose}
+              background="cyanX.200"
+              textColor="whiteX.100"
+              fontWeight="normal"
+              letterSpacing=".9px"
+              _hover={{ background: "cyanX.100" }}
+            >
+              Fechar
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </TemplateScreen>
   );
 }
