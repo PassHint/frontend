@@ -38,6 +38,13 @@ import { HintModal, HintModalEdit } from "../../components/HintModal";
 
 export default function Hint() {
   const [hints, setHints] = useState<InterfaceHint[]>([]);
+  const [strongPassword, setStrongPassword] = useState<{
+    color: string;
+    message: string;
+  }>({
+    color: "blackX.200",
+    message: "Verificador de senha",
+  });
   const [hintFocus, setHintFocus] = useState<InterfaceHint>();
   const [filterHints, setFilterHints] = useState<InterfaceHint[]>();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -337,6 +344,34 @@ export default function Hint() {
     setFilterHints(filter);
   }
 
+  function getPasswordStrength(event: ChangeEvent<HTMLInputElement>) {
+    const password = event.target.value;
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+    switch (strength) {
+      case 0:
+      case 1:
+        setStrongPassword({ color: "red.600", message: "Fraca" });
+        return { color: "red", message: "Fraca" };
+      case 2:
+        setStrongPassword({ color: "orange.500", message: "Média" });
+        return { color: "yellow", message: "Média" };
+      case 3:
+        setStrongPassword({ color: "yellow.500", message: "Quase lá" });
+        return { color: "yellow", message: "Quase lá" };
+      case 4:
+        setStrongPassword({ color: "green.600", message: "Forte" });
+        return { color: "green", message: "Forte" };
+      default:
+        setStrongPassword({ color: "transparent", message: "" });
+        return { color: "red", message: "Fraca" };
+    }
+  }
+
   return (
     <TemplateScreen>
       <Box
@@ -571,7 +606,20 @@ export default function Hint() {
             caracteres, combinando letras maiúsculas e minúsculas, números e
             simbolos especiais. Evite sequencias óbvias, datas de aniversário,
             nomes de familiares ou palavras comuns.
-            <Input onChange={(event) => console.log(event.target.value)} />
+            <Input
+              type="text"
+              marginTop="1rem"
+              onChange={(event) => getPasswordStrength(event)}
+            />
+            <Box
+              marginTop="2rem"
+              borderRadius="10px"
+              padding="1rem"
+              width="100%"
+              backgroundColor={strongPassword.color}
+            >
+              {strongPassword.message}
+            </Box>
           </ModalBody>
 
           <ModalFooter>
