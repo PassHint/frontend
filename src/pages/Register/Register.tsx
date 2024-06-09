@@ -10,7 +10,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
-import { useRef } from 'react';
+import { ChangeEvent, useRef, useState } from 'react';
 import { ValidationError } from 'yup';
 import { TemplateScreen } from '../../components/TemplateScreen/TemplateScreen';
 import { registerFormSchema } from '../../validation';
@@ -23,7 +23,40 @@ export default function Register() {
   const formPassWordRef = useRef<HTMLInputElement>(null);
   const formPasswordConfirmRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
+  const [strongPassword, setStrongPassword] = useState<{
+    color: string;
+    message: string;
+  }>({
+    color: "blackX.200",
+    message: "Verificador de senha",
+  });
+  function getPasswordStrength(event: ChangeEvent<HTMLInputElement>) {
+    const password = event.target.value;
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
 
+    switch (strength) {
+      case 0:
+      case 1:
+        setStrongPassword({ color: "red.600", message: "Fraca" });
+        return { color: "red", message: "Fraca" };
+      case 2:
+        setStrongPassword({ color: "orange.500", message: "Média" });
+        return { color: "yellow", message: "Média" };
+      case 3:
+        setStrongPassword({ color: "yellow.500", message: "Quase lá" });
+        return { color: "yellow", message: "Quase lá" };
+      case 4:
+        setStrongPassword({ color: "green.600", message: "Forte" });
+        return { color: "green", message: "Forte" };
+      default:
+        setStrongPassword({ color: "transparent", message: "" });
+        return { color: "red", message: "Fraca" };
+    }
+  }
   async function validateDate() {
     const usernameValue = formUsernameRef.current?.value || '';
     const passwordValue = formPassWordRef.current?.value || '';
@@ -153,7 +186,8 @@ export default function Register() {
             </Box>
             <Box>
               <FormLabel fontWeight='normal'>Senha:</FormLabel>
-              <Input
+              <Input 
+                onChange={(event)=>getPasswordStrength(event)}
                 type='password'
                 ref={formPassWordRef}
                 placeholder='Digite a senha'
@@ -168,6 +202,13 @@ export default function Register() {
                 placeholder='Confirme a senha'
                 _focus={{ boxShadow: 'none', borderColor: 'cyanX.100' }}
               />
+            </Box>
+            <Box
+              borderRadius="10px"
+              padding="0.5rem"
+              width="100%"
+              backgroundColor={strongPassword.color}
+            >
             </Box>
             <Button
               type='submit'
